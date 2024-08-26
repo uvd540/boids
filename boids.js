@@ -42,6 +42,28 @@ class Boids {
 			if (this.y[i] > this.world_size) {
 				this.y[i] = 0
 			}
+			let sum_vx = 0
+			let sum_vy = 0
+			let num_neighbors = 0
+			for (let j = 0; j < this.n; j++) {
+				if (i != j) {
+					if (distance(this.x[i], this.y[i], this.x[j], this.y[j]) < this.awareness_radius) {
+						sum_vx += this.vx[j]
+						sum_vy += this.vy[j]
+						num_neighbors++;
+					}
+				}
+			}
+			if (num_neighbors > 0) {
+				// alignment
+				const avg_vx = sum_vx / num_neighbors
+				const avg_vy = sum_vy / num_neighbors
+				// TODO applying a constant "alignment coefficient" causes all boids to tend
+				// towards the average velocity at the start of the simulation, which 
+				// is close to 0. As a result, all boids slow down
+				this.vx[i] += 0.01 * (avg_vx - this.vx[i])
+				this.vy[i] += 0.01 * (avg_vy - this.vy[i])
+			}
 		}
 	}
 	draw(ctx) {
@@ -60,4 +82,8 @@ class Boids {
 			ctx.fill()
 		}
 	}
+}
+
+function distance(x1, y1, x2, y2) {
+	return Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)))
 }
